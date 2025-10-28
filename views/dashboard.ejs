@@ -1,0 +1,47 @@
+<% layout('layout') -%>
+    <h1>Dashboard</h1>
+    <form method="post" action="/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger">Sair</button>
+    </form>
+
+    <hr>
+
+    <h3>Enviar arquivo</h3>
+    <form method="post" action="/upload" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="mb-3"><input type="file" name="file" class="form-control" required></div>
+        <button class="btn btn-secondary">Enviar</button>
+    </form>
+
+    <hr>
+
+    <h3>Logs recentes</h3>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Metadata</th>
+                <th>IP</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% logs.forEach(l=> { %>
+                <tr>
+                    <td>
+                        <%= l.event_type %>
+                    </td>
+                    <td>
+                        <%= JSON.stringify(l.event_metadata) %>
+                    </td>
+                    <td>
+                        <%= l.ip_addr %>
+                    </td>
+                    <td>
+                        <%= l.created_at %>
+                    </td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
