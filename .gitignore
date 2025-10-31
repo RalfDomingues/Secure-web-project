@@ -1,0 +1,6 @@
+# Uploads (não versionar)
+uploads/
+
+# Sistema
+.DS_Store
+Thumbs.db
