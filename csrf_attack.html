@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Site Malicioso - Teste CSRF</title>
+</head>
+<body>
+    <h1>🎣 Site Malicioso (Simulação)</h1>
+    <p>Este site está tentando fazer upload de um arquivo no seu sistema sem sua permissão...</p>
+    
+    <form id="attack" action="http://localhost:3000/upload" method="POST" enctype="multipart/form-data">
+        <input type="text" name="description" value="Arquivo enviado por ataque CSRF!">
+        <button type="submit">Tentar Atacar</button>
+    </form>
+
+    <hr>
+    
+    <h2>📊 O que deveria acontecer:</h2>
+    <ul>
+        <li>❌ O ataque deve FALHAR</li>
+        <li>✅ Você deve receber erro: "Formulário inválido (CSRF detectado)"</li>
+        <li>✅ Nenhum arquivo deve ser enviado</li>
+    </ul>
+
+    <script>
+        // Descomente a linha abaixo para tentar submeter automaticamente
+        // document.getElementById('attack').submit();
+    </script>
+</body>
+</html>

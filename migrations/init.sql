@@ -3,7 +3,6 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
-  email TEXT UNIQUE,
   password_hash TEXT NOT NULL,
   role TEXT DEFAULT 'user',
   locked_until TIMESTAMP NULL,
@@ -24,6 +23,7 @@ CREATE TABLE IF NOT EXISTS resources (
   user_id INTEGER REFERENCES users(id),
   stored_filename TEXT NOT NULL,
   original_name TEXT,
+  description TEXT,
   created_at TIMESTAMP DEFAULT now()
 );
 
@@ -38,6 +38,13 @@ WITH (OIDS=FALSE);
 ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid");
 
 CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+
+-- Índice para melhorar performance de consultas por usuário
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
+
+-- Índice para melhorar performance
+CREATE INDEX IF NOT EXISTS idx_resources_user_id ON resources(user_id);
 
 
 -- libera uso de tabelas para funcionamento da página
