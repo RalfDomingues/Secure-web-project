@@ -5,33 +5,45 @@
   </div>
 </div>
 
-<!-- Formulário de Upload -->
+<!-- Formulário de Import via Caminho Físico -->
 <div class="row mt-4">
   <div class="col-md-6">
     <div class="card">
       <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">📤 Upload de Arquivo</h5>
+        <h5 class="mb-0">📤 Importar Arquivo pelo Caminho (POC)</h5>
       </div>
       <div class="card-body">
-        <form action="/upload" method="POST" enctype="multipart/form-data">
+        <form action="/import-by-path" method="POST">
+          <!--------------------------------------------------------------------
+          Proteção CSRF (Cross-Site Request Forgery)
+          --------------------------------------------------------------------
+          O middleware csurf gera um token único por sessão.
+          Esse token deve estar presente nos formulários. Se não estiver, a requisição é barrada.
+          Isso impede que outro site envie requisições em nome do usuário. -->
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
           <div class="mb-3">
-            <label for="file" class="form-label">Escolha um arquivo:</label>
-            <input type="file" id="file" name="file" class="form-control" required>
-            <div class="form-text">Tamanho máximo: 5MB</div>
+            <label for="clientPath" class="form-label">Caminho completo no servidor (Windows):</label>
+            <input
+              type="text"
+              id="clientPath"
+              name="clientPath"
+              class="form-control"
+              placeholder='Ex: C:\Users\<%= username %>\Downloads\teste.pdf'
+              required
+            >
+            <div class="form-text">
+              Informe o caminho absoluto no servidor (POC para demonstração de mitigação de Path Traversal).
+            </div>
           </div>
 
           <div class="mb-3">
             <label for="description" class="form-label">Descrição (opcional):</label>
-            <textarea 
-              id="description" 
-              name="description" 
-              class="form-control" 
-              rows="3"
-              placeholder="Descreva o arquivo..."></textarea>
+            <textarea id="description" name="description" class="form-control" rows="3"
+              placeholder="Descreva o arquivo... (opcional)"></textarea>
           </div>
 
+          
           <button type="submit" class="btn btn-primary w-100">Enviar Arquivo</button>
         </form>
       </div>
@@ -48,12 +60,7 @@
         <form action="/search" method="GET">
           <div class="mb-3">
             <label for="search" class="form-label">Buscar por nome ou descrição:</label>
-            <input 
-              type="text" 
-              id="search" 
-              name="q" 
-              class="form-control" 
-              placeholder="Digite sua busca...">
+            <input type="text" id="search" name="q" class="form-control" placeholder="Digite sua busca...">
           </div>
           <button type="submit" class="btn btn-success w-100">Buscar</button>
         </form>
@@ -71,7 +78,7 @@
         <h5 class="mb-0">📁 Meus Arquivos</h5>
       </div>
       <div class="card-body">
-        <% if (files && files.length > 0) { %>
+        <% if (files && files.length> 0) { %>
           <div class="table-responsive">
             <table class="table table-hover">
               <thead>
@@ -83,15 +90,21 @@
                 </tr>
               </thead>
               <tbody>
-                <% files.forEach(file => { %>
+                <% files.forEach(file=> { %>
                   <tr>
                     <td><%= file.original_name %></td>
-                    <td><%= file.description || '-' %></td>
+                    <td>
+                      <% if (file.description) { %>
+                        <%= file.description %>
+                      <% } else { %>-<% } %>
+                    </td>
                     <td><%= new Date(file.created_at).toLocaleString('pt-BR') %></td>
                     <td>
-                      <a href="/files/<%= file.id %>" class="btn btn-sm btn-primary">
-                        ⬇️ Download
-                      </a>
+                      <form action="/files/download" method="POST" class="d-inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="id" value="<%= file.id %>">
+                        <button class="btn btn-sm btn-primary">⬇️ Download</button>
+                      </form>
                     </td>
                   </tr>
                 <% }) %>
@@ -116,7 +129,7 @@
         <h5 class="mb-0">📋 Últimas Atividades</h5>
       </div>
       <div class="card-body">
-        <% if (logs && logs.length > 0) { %>
+        <% if (logs && logs.length> 0) { %>
           <div class="table-responsive">
             <table class="table table-sm table-striped">
               <thead>
@@ -128,16 +141,12 @@
                 </tr>
               </thead>
               <tbody>
-                <% logs.slice(0, 10).forEach(log => { %>
+                <% logs.slice(0, 10).forEach(log=> { %>
                   <tr>
                     <td><code><%= log.event_type %></code></td>
                     <td>
                       <small>
-                        <pre style="white-space: pre-wrap; margin: 0;">
-<%= typeof log.event_metadata === 'object' 
-      ? JSON.stringify(log.event_metadata, null, 2) 
-      : (log.event_metadata || '-') %>
-                        </pre>
+                        <pre style="white-space: pre-wrap; margin: 0;"><% if (typeof log.event_metadata === 'object') { %><%= JSON.stringify(log.event_metadata, null, 2) %><% } else { %><%= log.event_metadata || '-' %><% } %></pre>
                       </small>
                     </td>
                     <td><%= log.ip_addr || '-' %></td>
@@ -157,11 +166,16 @@
   </div>
 </div>
 
-
 <!-- Logout -->
 <div class="row mt-4 mb-5">
   <div class="col-12 text-center">
     <form action="/logout" method="POST" class="d-inline">
+      <!--------------------------------------------------------------------
+      Proteção CSRF (Cross-Site Request Forgery)
+      --------------------------------------------------------------------
+      O middleware csurf gera um token único por sessão.
+      Esse token deve estar presente nos formulários. Se não estiver, a requisição é barrada.
+      Isso impede que outro site envie requisições em nome do usuário.-->
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button type="submit" class="btn btn-danger">🚪 Sair</button>
     </form>

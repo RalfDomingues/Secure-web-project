@@ -1,6 +1,9 @@
 # Uploads (não versionar)
-uploads/
+uploads/*
 
 # Sistema
 .DS_Store
 Thumbs.db
+
+#Pasta usuários
+novos usuários/*

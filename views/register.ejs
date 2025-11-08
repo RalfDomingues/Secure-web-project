@@ -1,5 +1,11 @@
 <h1>Registro</h1>
 <form action="/register" method="POST" class="mt-3">
+   <!--------------------------------------------------------------------
+   Proteção CSRF (Cross-Site Request Forgery)
+   ------------------------------------------------------------------
+   O middleware csurf gera um token único por sessão.
+   Esse token deve estar presente nos formulários. Se não estiver, a requisição é barrada.
+   Isso impede que outro site envie requisições em nome do usuário.-->
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
   <div class="mb-3">

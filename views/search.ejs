@@ -12,12 +12,7 @@
       <div class="card-body">
         <form action="/search" method="GET">
           <div class="input-group input-group-lg">
-            <input 
-              type="text" 
-              name="q" 
-              class="form-control" 
-              placeholder="Digite sua busca..." 
-              value="<%= query %>"
+            <input type="text" name="q" class="form-control" placeholder="Digite sua busca..." value="<%= query %>"
               autofocus>
             <button class="btn btn-primary" type="submit">
               🔍 Buscar
@@ -35,62 +30,72 @@
     <div class="card">
       <div class="card-header bg-info text-white">
         <h5 class="mb-0">
-          📄 Resultados 
+          📄 Resultados
           <% if (query) { %>
             para "<%= query %>"
-          <% } %>
+              <% } %>
         </h5>
       </div>
       <div class="card-body">
-        <% if (query && results.length === 0) { %>
+        <% if (query && results.length===0) { %>
           <div class="alert alert-warning">
             <strong>Nenhum resultado encontrado</strong> para sua busca.
           </div>
-        <% } else if (results.length > 0) { %>
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Nome do Arquivo</th>
-                  <th>Descrição</th>
-                  <th>Data</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% results.forEach(file => { %>
+          <% } else if (results.length> 0) { %>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
                   <tr>
-                    <td>
-                      <strong><%= file.original_name %></strong>
-                    </td>
-                    <td>
-                      <% if (file.description) { %>
-                        <span class="text-muted"><%= file.description %></span>
-                      <% } else { %>
-                        <em class="text-muted">Sem descrição</em>
-                      <% } %>
-                    </td>
-                    <td>
-                      <small><%= new Date(file.created_at).toLocaleString('pt-BR') %></small>
-                    </td>
-                    <td>
-                      <a href="/files/<%= file.id %>" class="btn btn-sm btn-primary">
-                        ⬇️ Download
-                      </a>
-                    </td>
+                    <th>Nome do Arquivo</th>
+                    <th>Descrição</th>
+                    <th>Data</th>
+                    <th>Ações</th>
                   </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-          <p class="text-muted small mb-0">
-            <strong><%= results.length %></strong> arquivo(s) encontrado(s)
-          </p>
-        <% } else { %>
-          <div class="alert alert-info">
-            Digite algo no campo de busca para procurar seus arquivos.
-          </div>
-        <% } %>
+                </thead>
+                <tbody>
+                  <% results.forEach(file=> { %>
+                    <tr>
+                      <td>
+                        <strong>
+                          <%= file.original_name %>
+                        </strong>
+                      </td>
+                      <td>
+                        <% if (file.description) { %>
+                          <span class="text-muted">
+                            <%= file.description %>
+                          </span>
+                          <% } else { %>
+                            <em class="text-muted">Sem descrição</em>
+                            <% } %>
+                      </td>
+                      <td>
+                        <small>
+                          <%= new Date(file.created_at).toLocaleString('pt-BR') %>
+                        </small>
+                      </td>
+                      <td>
+                        <form action="/files/download" method="POST" class="d-inline">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="id" value="<%= file.id %>">
+                          <button class="btn btn-sm btn-primary">⬇️ Download</button>
+                        </form>
+                      </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-muted small mb-0">
+              <strong>
+                <%= results.length %>
+              </strong> arquivo(s) encontrado(s)
+            </p>
+            <% } else { %>
+              <div class="alert alert-info">
+                Digite algo no campo de busca para procurar seus arquivos.
+              </div>
+              <% } %>
       </div>
     </div>
   </div>
@@ -104,6 +109,3 @@
     </a>
   </div>
 </div>
-
-
-

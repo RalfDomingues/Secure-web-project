@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS resources (
   stored_filename TEXT NOT NULL,
   original_name TEXT,
   description TEXT,
-  created_at TIMESTAMP DEFAULT now()
+  created_at TIMESTAMP DEFAULT now(),
+  size BIGINT
 );
 
 -- cria tabela usada pelo connect-pg-simple (resolução de erro session)
