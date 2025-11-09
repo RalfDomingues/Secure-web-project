@@ -200,10 +200,6 @@ async function registerUser({ username, password }) {
         throw error;
     }
 
-
-
-
-
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const result = await pool.query(
         'INSERT INTO users (username, password_hash) VALUES ($1,$2) RETURNING id',
