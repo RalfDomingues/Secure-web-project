@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🎯 Simulador de Ataque CSRF — /upload</title>
+<style>
+    body {
+        font-family: "Segoe UI", Roboto, Arial;
+        background: #f2f4f7;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+    }
+    .container {
+        background: #fff;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 24px 28px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    h1 {
+        margin-top: 0;
+        color: #222;
+    }
+    h2 {
+        color: #333;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 6px;
+    }
+    label {
+        display: block;
+        margin: 12px 0 4px;
+        font-weight: 600;
+    }
+    input[type=text], select, input[type=file] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+    .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+    }
+    button {
+        background: #0078d7;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button:hover { background: #005fa3; }
+    pre {
+        background: #f6f8fa;
+        padding: 10px;
+        border-radius: 6px;
+        overflow: auto;
+        border: 1px solid #ddd;
+    }
+    .muted {
+        color: #555;
+        font-size: 0.9rem;
+    }
+    .result-box {
+        margin-top: 16px;
+        background: #fafafa;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 60px;
+        white-space: pre-wrap;
+        font-family: Consolas, monospace;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🎯 Simulador de Ataque CSRF</h1>
+<p class="muted">Teste a rota <code>/upload</code> da sua aplicação e veja se há proteção contra requisições externas.</p>
+
+<h2>Configuração</h2>
+
+<label>URL de destino</label>
+<input id="actionUrl" type="text" value="http://localhost:3000/upload">
+
+<label>Nome do campo de arquivo (como no multer)</label>
+<input id="fileFieldName" type="text" value="file">
+
+<label>Descrição</label>
+<input id="description" type="text" value="Arquivo enviado por ataque CSRF!">
+
+<label>Gerar arquivo de teste automaticamente?</label>
+<select id="autoGen">
+    <option value="no">Não — selecionar manualmente</option>
+    <option value="yes">Sim — gerar test.txt</option>
+</select>
+
+<label>Arquivo (opcional)</label>
+<input id="fileInput" type="file">
+
+<div class="buttons">
+    <button id="submitFetch">🚀 Enviar via Fetch (sem redirecionar)</button>
+    <button id="openForm">🧪 Enviar como Form (abre nova aba)</button>
+</div>
+
+<h3>Pré-visualização</h3>
+<pre id="preview"></pre>
+
+<h3>Resultado</h3>
+<div id="result" class="result-box"></div>
+
+<script>
+(async function(){
+    const actionUrl = document.getElementById('actionUrl');
+    const fileFieldName = document.getElementById('fileFieldName');
+    const description = document.getElementById('description');
+    const fileInput = document.getElementById('fileInput');
+    const autoGen = document.getElementById('autoGen');
+    const preview = document.getElementById('preview');
+    const result = document.getElementById('result');
+    const submitFetchBtn = document.getElementById('submitFetch');
+    const openFormBtn = document.getElementById('openForm');
+
+    function updatePreview(){
+        preview.textContent = JSON.stringify({
+            action: actionUrl.value,
+            fileField: fileFieldName.value,
+            description: description.value,
+            autoGen: autoGen.value
+        }, null, 2);
+    }
+    [actionUrl,fileFieldName,description,autoGen].forEach(e=>e.addEventListener('input',updatePreview));
+    updatePreview();
+
+    async function makeTestFile(){
+        const blob = new Blob(
+            ["Arquivo gerado automaticamente em " + new Date().toISOString()],
+            { type: 'text/plain' }
+        );
+        return new File([blob], "test.txt", { type: "text/plain" });
+    }
+
+    submitFetchBtn.addEventListener('click', async ()=>{
+        result.textContent = "Enviando...";
+        try {
+            const fd = new FormData();
+            fd.append('description', description.value);
+            const field = fileFieldName.value || 'file';
+
+            if (autoGen.value === 'yes') fd.append(field, await makeTestFile());
+            else if (fileInput.files.length) fd.append(field, fileInput.files[0]);
+
+            const resp = await fetch(actionUrl.value, {
+                method: 'POST',
+                body: fd,
+                credentials: 'include',
+                redirect: 'manual' // evita seguir redirects como login
+            });
+
+            let body = "";
+            try { body = await resp.text(); } 
+            catch { body = "[Não foi possível ler corpo — CORS bloqueado]"; }
+
+            let headers = "";
+            for (const [k,v] of resp.headers.entries()) headers += `${k}: ${v}\n`;
+
+            result.textContent = 
+                `STATUS: ${resp.status} ${resp.statusText}\n\n` +
+                `HEADERS:\n${headers}\n` +
+                `CORPO:\n${body}`;
+        } catch(err) {
+            result.textContent = "Erro: " + err.message;
+        }
+    });
+
+    openFormBtn.addEventListener('click', async ()=>{
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.enctype = 'multipart/form-data';
+        form.action = actionUrl.value;
+        form.target = '_blank';
+
+        const desc = document.createElement('input');
+        desc.type = 'hidden';
+        desc.name = 'description';
+        desc.value = description.value;
+        form.appendChild(desc);
+
+        const field = fileFieldName.value || 'file';
+        if (fileInput.files.length) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.name = field;
+            try {
+                const dt = new DataTransfer();
+                dt.items.add(fileInput.files[0]);
+                input.files = dt.files;
+                form.appendChild(input);
+            } catch {}
+        }
+        document.body.appendChild(form);
+        form.submit();
+        result.textContent = "Formulário enviado — verifique nova aba.";
+    });
+})();
+</script>
+</div>
+</body>
+</html>

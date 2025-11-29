@@ -1,0 +1,26 @@
+<h1>Login</h1>
+<% if (error) { %>
+    <div class="alert alert-danger">
+        <%= error %>
+    </div>
+    <% } %>
+        <form method="post" action="/login">
+
+            <!--------------------------------------------------------------------
+            Proteção CSRF (Cross-Site Request Forgery)
+            ------------------------------------------------------------------
+            O middleware csurf gera um token único por sessão.
+            Esse token deve estar presente nos formulários. Se não estiver, a requisição é barrada.
+            Isso impede que outro site envie requisições em nome do usuário.-->
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="mb-3">
+                <label>Usuário</label>
+                <input name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Senha</label>
+                <input name="password" type="password" class="form-control" required>
+            </div>
+            <button class="btn btn-primary">Entrar</button>
+            <a href="/register" class="btn btn-link">Criar conta</a>
+        </form>

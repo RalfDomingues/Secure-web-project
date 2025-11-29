@@ -1,0 +1,42 @@
+{
+    "name": "secure-web-project",
+    "version": "1.0.0",
+    "description": "O objetivo deste trabalho é aplicar os **conceitos de segurança da informação** estudados na disciplina no desenvolvimento de um projeto de software.",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "nodemon app.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^6.0.0",
+        "connect-pg-simple": "^10.0.0",
+        "crypto": "^1.0.1",
+        "csurf": "^1.11.0",
+        "dotenv": "^17.2.3",
+        "ejs": "^3.1.10",
+        "express": "^5.1.0",
+        "express-ejs-layouts": "^2.5.1",
+        "express-rate-limit": "^8.1.0",
+        "express-session": "^1.18.2",
+        "helmet": "^8.1.0",
+        "multer": "^2.0.2",
+        "pg": "^8.16.3",
+        "puppeteer": "^24.29.1",
+        "uuid": "^13.0.0",
+        "winston": "^3.18.3"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.10"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/RalfDomingues/secure-web-project.git"
+    },
+    "bugs": {
+        "url": "https://github.com/RalfDomingues/secure-web-project/issues"
+    },
+    "homepage": "https://github.com/RalfDomingues/secure-web-project#readme"
+}
