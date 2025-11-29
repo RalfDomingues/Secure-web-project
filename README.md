@@ -27,6 +27,46 @@ O sistema implementa medidas de mitigação contra:
 
 ---
 
+## 🧾 Auditoria e Registro de Logs
+- Todas as ações críticas são registradas para rastreabilidade;
+- Logs de uploads, downloads, criação de usuário, login e uso geral;
+- Proteção contra injeção de dados maliciosos nos logs.
+
+---
+
+# 🔒 Novas Funcionalidades de Segurança (Versão 2.0)
+
+## 🔐 1. Comunicação Segura com TLS (HTTPS)
+A aplicação opera **exclusivamente** via HTTPS utilizando **TLS 1.2+**.
+
+Inclui:
+- Geração de certificado digital via OpenSSL;
+- Uso de **Autoridade Certificadora (CA) local**;
+- Instalação da CA raiz no Windows;
+- Redirecionamento automático HTTP → HTTPS;
+- Exibição do **cadeado de segurança** no navegador.
+
+---
+
+## 📁 2. Criptografia de Arquivos (AES-256-GCM)
+
+Todos os arquivos enviados pelos usuários são **criptografados antes de serem armazenados**.
+
+### ✔ Funcionamento:
+- **Upload:** arquivo é carregado em memória e criptografado com AES-256-GCM;
+- Armazenado com extensão `.enc`;
+- Estrutura do arquivo:  
+  **[IV][CIPHERTEXT][AUTH_TAG]**
+- **Download:** arquivo é descriptografado dinamicamente antes de ser enviado.
+
+### ✔ Benefícios:
+- Confidencialidade dos arquivos em repouso;
+- Integridade via tag de autenticação GCM;
+- Chave segura em `FILE_ENC_KEY`;
+- IV único para cada arquivo, conforme recomendações do NIST.
+
+---
+
 ### 🌐 Acessar no navegador
 Função	URL
 Criar usuário	http://localhost:3000/register
